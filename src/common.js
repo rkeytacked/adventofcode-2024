@@ -57,6 +57,16 @@ function associate(arr, entryFunc = x => x) {
     }, {});
 }
 
+function intersect(arr1, arr2) {
+    const result = new Set();
+    for (let x of arr1) {
+        if (arr2.includes(x)) {
+            result.add(x);
+        }
+    }
+    return [...result];
+}
+
 module.exports = {
     readLines,
     readCharArrays,
@@ -70,5 +80,6 @@ module.exports = {
     sum,
     prod,
     median,
+    intersect,
     log: console.log
 };
