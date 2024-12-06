@@ -49,7 +49,7 @@ function max(arr) {
     return Math.max(...arr);
 }
 
-function associate(arr, entryFunc = x => x) {
+function map(arr, entryFunc = x => x) {
     return arr.reduce((map, x) => {
         const [key, val] = entryFunc(x);
         map[key] = val;
@@ -57,29 +57,116 @@ function associate(arr, entryFunc = x => x) {
     }, {});
 }
 
+function key(items) {
+    return [...(typeof items === "object" ? items : arguments)].join(':');
+}
+
+class ObjectSet extends Set {
+    values = new Map();
+
+    add(elem) {
+        let k = key(elem);
+        this.values.set(k, elem);
+        return super.add(k);
+    }
+
+    has(elem) {
+        return super.has(key(elem));
+    }
+
+    forEach(callbackfn, thisArg) {
+        const values = this.values;
+        super.forEach((k, v, s) => callbackfn.call(thisArg, values.get(k), values.get(k), s));
+    }
+
+    [Symbol.iterator]() {
+        const iter = super[Symbol.iterator]();
+        const values = this.values;
+        return {
+            next() {
+                const result = iter.next();
+                if (!result.done) {
+                    result.value = values.get(result.value);
+                }
+                return result;
+            },
+        };
+    }
+}
+
+function set(...items) {
+    const result = new ObjectSet();
+    items.forEach(x => result.add(x));
+    return result;
+}
+
+function spanYX(y, x, dy = 1, dx = 1) {
+    return [...Array(2 * dy + 1).keys()].flatMap(j =>
+        [...Array(2 * dx + 1).keys()].map(i => [y + j - dy, x + i - dx])
+    );
+}
+
+function unique(arr) {
+    const set = new Set(arr);
+    set.delete(undefined);
+    return [...set];
+}
+
 function intersect(arr1, arr2) {
-    const result = new Set();
+    const result = [];
     for (let x of arr1) {
         if (arr2.includes(x)) {
-            result.add(x);
+            result.push(x);
         }
     }
-    return [...result];
+    return result;
+}
+
+function ggT2(x, y) {
+    return y === 0 ? Math.abs(x) : ggT2(y, x % y);
+}
+
+function ggT(x, y, ...more) {
+    if (typeof x === 'object') {
+        return ggT(...x);
+    }
+    return more.length ? ggT(ggT2(x, y), ...more) : ggT2(x, y);
+}
+
+function kgV(items) {
+    let args = [...(typeof items === "object" ? items : arguments)];
+    return prod(args) / ggT(args);
+}
+
+function range(len) {
+    return [...Array(len).keys()];
+}
+
+function mod(a, b) {
+    return ((a % b) + b) % b;
 }
 
 module.exports = {
     readLines,
     readCharArrays,
     readSingletonMaps,
-    associate,
+    map,
     split,
     toNumber,
+    key,
+    set,
     min,
     max,
     sort,
     sum,
     prod,
     median,
+    spanYX,
+    unique,
     intersect,
+    kgV,
+    ggT,
+    range,
+    mod,
     log: console.log
 };
