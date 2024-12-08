@@ -61,7 +61,11 @@ function map(arr, entryFunc = x => x) {
 }
 
 function key(items) {
-    return [...(typeof items === "object" ? items : arguments)].join(':');
+    return [...(arguments.length === 1 && typeof items === "object" ? items : arguments)].join(':');
+}
+
+function unkey(key, mapping = x => x) {
+    return key.split(':').map(mapping);
 }
 
 class ObjectSet extends Set {
@@ -157,6 +161,7 @@ module.exports = {
     split,
     toNumber,
     key,
+    unkey,
     set,
     min,
     max,
