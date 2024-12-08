@@ -5,7 +5,10 @@ function readLines(filename, mapLine = x => x, separator = '\n') {
 }
 
 function readCharArrays(filename, mapChar = x => x) {
-    return readLines(filename, x => [...x].map(mapChar));
+    let lines = readLines(filename, x => [...x].map(mapChar));
+    lines.height = lines.length;
+    lines.width = lines[0].length;
+    return lines;
 }
 
 function readSingletonMaps(filename, mapValue = x => x, regex = /^(\S+)\s+(.*)/) {
