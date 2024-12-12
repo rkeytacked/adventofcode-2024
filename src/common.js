@@ -77,6 +77,12 @@ class ObjectSet extends Set {
         return super.add(k);
     }
 
+    delete(elem) {
+        let k = key(elem);
+        this.values.delete(k);
+        return super.delete(k);
+    }
+
     has(elem) {
         return super.has(key(elem));
     }
