@@ -24,6 +24,38 @@ function split(regex, mapValue = x => x) {
     return line => line.split(regex).map(mapValue);
 }
 
+function shiftUntil(arr, condition = x => !x, mapValue = x => x) {
+    let result = [];
+    for (let elem; !condition(elem = arr.shift());) {
+        result.push(mapValue(elem));
+    }
+    return result;
+}
+
+function forEach(arr, val, callback) {
+    for (let i = 0; i < arr.length; i++) {
+        arr[i] === val && callback(i);
+    }
+}
+
+function forEach2D(arr, val, callback) {
+    for (let i = 0; i < arr.length; i++) {
+        for (let line = arr[i], j = 0; j < line.length; j++) {
+            line[j] === val && callback(j, i);
+        }
+    }
+}
+
+function forEach3D(arr, val, callback) {
+    for (let i = 0; i < arr.length; i++) {
+        for (let line = arr[i], j = 0; j < line.length; j++) {
+            for (let row = line[j], k = 0; k < row.length; k++) {
+                row[k] === val && callback(k, j, i);
+            }
+        }
+    }
+}
+
 function sum(arr) {
     return arr.reduce((x, y) => x + y, 0);
 }
@@ -166,6 +198,10 @@ module.exports = {
     map,
     split,
     toNumber,
+    shiftUntil,
+    forEach,
+    forEach2D,
+    forEach3D,
     key,
     unkey,
     set,
