@@ -191,6 +191,18 @@ function mod(a, b) {
     return ((a % b) + b) % b;
 }
 
+function binarySearch(lowerBound, upperBound, conditionCallback) {
+    while (lowerBound < upperBound) {
+        let mid = Math.floor((lowerBound + upperBound) / 2);
+        if (conditionCallback(mid)) {
+            upperBound = mid;
+        } else {
+            lowerBound = mid + 1;
+        }
+    }
+    return lowerBound;
+}
+
 module.exports = {
     readLines,
     readCharArrays,
@@ -218,5 +230,6 @@ module.exports = {
     ggT,
     range,
     mod,
+    binarySearch,
     log: console.log
 };
