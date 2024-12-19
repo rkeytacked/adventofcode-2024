@@ -100,6 +100,19 @@ function unkey(key, mapping = x => x) {
     return key.split(':').map(mapping);
 }
 
+function cache(func, keyMapping = x => key(x)) {
+    const cache = new Map();
+    return function() {
+        const key = keyMapping.apply(this, arguments);
+        if (cache.has(key)) {
+            return cache.get(key);
+        }
+        const result = func.apply(this, arguments);
+        cache.set(key, result);
+        return result;
+    }
+}
+
 class ObjectSet extends Set {
     values = new Map();
 
@@ -216,6 +229,7 @@ module.exports = {
     forEach3D,
     key,
     unkey,
+    cache,
     set,
     min,
     max,
