@@ -102,7 +102,7 @@ function unkey(key, mapping = x => x) {
 
 function cache(func, keyMapping = x => key(x)) {
     const cache = new Map();
-    return function() {
+    return Object.assign(function() {
         const key = keyMapping.apply(this, arguments);
         if (cache.has(key)) {
             return cache.get(key);
@@ -110,7 +110,7 @@ function cache(func, keyMapping = x => key(x)) {
         const result = func.apply(this, arguments);
         cache.set(key, result);
         return result;
-    }
+    }, {cache});
 }
 
 class ObjectSet extends Set {
