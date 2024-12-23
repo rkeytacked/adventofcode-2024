@@ -165,9 +165,9 @@ function spanYX(y, x, dy = 1, dx = 1) {
 }
 
 function unique(arr) {
-    const set = new Set(arr);
-    set.delete(undefined);
-    return [...set];
+    const result = set(...arr);
+    result.delete(undefined);
+    return [...result];
 }
 
 function intersect(arr1, arr2) {
