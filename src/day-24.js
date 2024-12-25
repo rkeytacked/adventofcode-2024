@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const {log, readLines, split, shiftUntil, cache, unique} = require("./common");
+const {log, readLines, split, shiftUntil, cache, unique, min} = require("./common");
 
 /* * * * * * * *
  * * DAY  24 * *
@@ -10,14 +10,15 @@ let input = readLines('../inputs/24.txt');
 /* * * * * * * *
  * * Part #1 * *
  * * * * * * * */
-const initialValues = new Map(shiftUntil(input).map(split(': ')));
-const gates = new Map(input.map(split(' ')).map(([a, op, b, , c]) => [c, {op, params: [a, b].sort()}]));
 
-const getValue = cache(name => {
-    if (initialValues.has(name)) {
-        return Number(initialValues.get(name));
+const initialValues = new Map(shiftUntil(input).map(split(': ')));
+const gates = new Map(input.map(split(' ')).map(([a, op, b, , c]) => [c, [op, ...[a, b].sort()]]));
+
+const getValue = cache(out => {
+    if (initialValues.has(out)) {
+        return Number(initialValues.get(out));
     }
-    let {op, params: [a, b]} = gates.get(name);
+    let [op, a, b] = gates.get(out);
     switch (op) {
         case 'AND':
             return getValue(a) & getValue(b);
@@ -28,8 +29,9 @@ const getValue = cache(name => {
     }
 });
 
-const inputsX = [...gates.values().flatMap(({params}) => params).filter(name => name[0] === 'x')].sort();
-const outputs = [...gates.keys().filter(name => name[0] === 'z')].sort();
+
+const isOut = name => name[0] === 'z';
+const outputs = [...gates.keys().filter(isOut)].sort();
 
 const binaryResult = outputs.map(getValue).reverse().join('');
 log('solution #1:', Number.parseInt(binaryResult, 2));
@@ -41,33 +43,33 @@ log('\n-----------------------------------------------------------\n')
  * * Part #2 * *
  * * * * * * * */
 
-const xFirst = inputsX[0];
+const isX = name => name[0] === 'x';
+const xFirst = min(initialValues.keys().filter(isX));
 const zLast = outputs[outputs.length - 1];
 
-function isOutput(name) {
-    return name[0] === 'z';
-}
+const isCarryOverGate = ([op, a]) => a === xFirst ? op === 'AND' : !isX(a) && op === 'OR';
+const isXorInputGate = ([op, a]) => isX(a) && op === 'XOR';
+const isAndGate = ([op]) => op === 'AND';
 
-function isInputs(a, b) {
-    return a[0] === 'x' && b[0] === 'y';
-}
-
-function* spotErrors() {
-    for (let [out, {op, params: [a, b]}] of gates) {
-        if (isOutput(out) && op !== (out === zLast ? 'OR' : 'XOR')) yield out;
-        if (op === 'XOR' && !isInputs(a, b) && !isOutput(out)) yield out;
-        if ((op === 'XOR' || op === 'AND') && !isInputs(a, b)) {
-            let isAndOrGate = ({op, params}) => params[0] === xFirst ? op === 'AND' : !isInputs(params) && op === 'OR';
-            let isXorGate = ({op, params}) => isInputs(...params) && op === 'XOR';
-            let A = gates.get(a), B = gates.get(b);
-            if (isAndOrGate(A) && !isXorGate(B) || isXorGate(A) && !isAndOrGate(B)) yield b;
-            if (isAndOrGate(B) && !isXorGate(A) || isXorGate(B) && !isAndOrGate(A)) yield a;
-        }
-        if (op === 'OR') {
-            if (gates.get(a).op !== 'AND') yield a;
-            if (gates.get(b).op !== 'AND') yield b;
+function* spotAdditionCircuitErrors() {
+    for (let [out, [op, a, b]] of gates) {
+        if (isOut(out) && op !== (out === zLast ? 'OR' : 'XOR')) yield out;
+        switch (op) {
+            case 'XOR':
+                if (!isOut(out) && !isX(a)) yield out;
+                // no break
+            case 'AND':
+                if (!isX(a)) {
+                    let A = gates.get(a), B = gates.get(b);
+                    if (isCarryOverGate(A) && !isXorInputGate(B) || isXorInputGate(A) && !isCarryOverGate(B)) yield b;
+                    if (isCarryOverGate(B) && !isXorInputGate(A) || isXorInputGate(B) && !isCarryOverGate(A)) yield a;
+                }
+                break;
+            case 'OR':
+                if (!isAndGate(gates.get(a))) yield a;
+                if (!isAndGate(gates.get(b))) yield b;
         }
     }
 }
 
-log('solution #2:', unique(spotErrors()).sort().join(','));
+log('solution #2:', unique(spotAdditionCircuitErrors()).sort().join(','));

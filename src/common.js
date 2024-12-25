@@ -77,11 +77,11 @@ function median(arr) {
 }
 
 function min(arr) {
-    return Math.min(...arr);
+    return arr.reduce((a,b) => a < b ? a : b);
 }
 
 function max(arr) {
-    return Math.max(...arr);
+    return arr.reduce((a,b) => a > b ? a : b);
 }
 
 function map(arr, entryFunc = x => x) {
